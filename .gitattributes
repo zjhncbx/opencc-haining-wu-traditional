@@ -1,0 +1,7 @@
+# 统一使用 LF 换行：OpenCC 的 txt 字典、Rime 的 yaml 与 Python 脚本
+# 在 Windows / Linux / CI 之间必须保持字节一致。
+* text=auto eol=lf
+
+# 二进制字典与压缩包
+*.ocd2 binary
+*.zip binary
