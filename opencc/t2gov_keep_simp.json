@@ -1,0 +1,33 @@
+{
+  "name": "Traditional Chinese to Traditional Chinese (Chinese Government standard) with Simplified Chinese remaining unchanged — Haining Wu Revision",
+  "normalization": [
+    {
+      "dict": {
+        "type": "text",
+        "file": "CJK_Compatibility_Ideographs.txt"
+      }
+    }
+  ],
+  "conversion_chain": [
+    {
+      "dict": {
+        "type": "group",
+        "match_policy": "short_circuit",
+        "dicts": [
+          {
+            "type": "text",
+            "file": "HNGuard.txt"
+          },
+          {
+            "type": "text",
+            "file": "TGPhrases.txt"
+          },
+          {
+            "type": "text",
+            "file": "TGCharacters_keep_simp.txt"
+          }
+        ]
+      }
+    }
+  ]
+}

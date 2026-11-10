@@ -1,0 +1,11 @@
+# luna_pinyin.custom.yaml
+# 将朙月拼音的输出切换为《大陆标准繁体汉字海宁吴语修订方案》字形。
+# 放到 Rime 用户文件夹后「重新部署」即可。
+patch:
+  switches:
+    - name: simplification
+      reset: 1
+  simplifier:
+    opencc_config: t2hn_keep_simp.json
+    option_name: simplification
+  "translator/dictionary": haining_wu_extended
