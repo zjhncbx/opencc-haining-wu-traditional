@@ -1,13 +1,17 @@
 name: Build dictionaries from upstream
 
-# 本仓库不存放 1 MB 级的完整词表二进制文本；它们由本工作流从上游
-# OpenCC 规范繁体仓库按《大陆标准繁体汉字海宁吴语修订方案》生成并提交。
+# 本仓库的 1 MB 级完整词表可由本地 tools/build.py 生成，也可由本工作流
+# 从上游 OpenCC 规范繁体仓库按《大陆标准繁体汉字海宁吴语修订方案》生成并提交。
+# 若仓库里已经包含完整字典（例如手工推送了本地构建结果），工作流只做校验。
 # 生成规则集中在 tools/rules.py 与 rules/overrides.tsv。
-# 生成完成后仓库即「clone 即用」：opencc/ 下含全部 json 与 txt 字典。
 
 on:
   push:
     branches: [main, master]
+    paths:
+      - 'tools/**'
+      - 'rules/**'
+      - '.github/workflows/build-dictionaries.yml'
   workflow_dispatch:
 
 permissions:
@@ -25,7 +29,17 @@ jobs:
         with:
           python-version: '3.12'
 
+      - name: Check whether dictionaries are already present
+        id: check
+        run: |
+          if [ -f opencc/s2hn.json ] && [ -f opencc/STPhrases.txt ] && [ -f opencc/TGPhrases.txt ]; then
+            echo "present=true" >> "$GITHUB_OUTPUT"
+          else
+            echo "present=false" >> "$GITHUB_OUTPUT"
+          fi
+
       - name: Clone upstream tables
+        if: steps.check.outputs.present != 'true'
         run: |
           git clone --depth 1 \
             https://github.com/TerryTian-tech/OpenCC-Traditional-Chinese-characters-according-to-Chinese-government-standards.git \
@@ -33,6 +47,7 @@ jobs:
           echo "UPSTREAM_COMMIT=$(git -C upstream-src rev-parse --short HEAD)" >> "$GITHUB_ENV"
 
       - name: Build revised tables
+        if: steps.check.outputs.present != 'true'
         run: python tools/build.py --upstream upstream-src/t2gov
 
       - name: Verify conversions
@@ -41,6 +56,7 @@ jobs:
           python tools/verify.py
 
       - name: Commit generated dictionaries
+        if: steps.check.outputs.present != 'true'
         run: |
           git config user.name "github-actions[bot]"
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
