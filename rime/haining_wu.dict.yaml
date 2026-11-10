@@ -1,0 +1,68 @@
+# Rime dictionary
+# 《大陆标准繁体汉字海宁吴语修订方案》分立正字与例词
+# 由 tools/build.py 依据 tools/rules.py 生成，请勿手工改动本文件。
+---
+name: haining_wu
+version: "1.0.0"
+sort: by_weight
+...
+并	bing	1000
+併	bing	900
+並	bing	900
+幷	bing	100
+倂	bing	100
+竝	bing	100
+只	zhi	1000
+衹	zhi	900
+隻	zhi	900
+祇	zhi	200
+秖	zhi	100
+吃	chi	1000
+喫	chi	900
+个	ge	1000
+個	ge	1000
+箇	ge	900
+向	xiang	1000
+嚮	xiang	300
+才	cai	1000
+纔	cai	300
+肛	gang	800
+疘	gong	800
+哄	hong	1000
+鬨	hong	900
+閧	hong	200
+阁	ge	1000
+閣	ge	1000
+閤	ge	900
+𬮤	ge	900
+合	he	1000
+并州	bing zhou	800
+合併	he bing	800
+兼併	jian bing	700
+並非	bing fei	800
+並且	bing qie	800
+並列	bing lie	700
+喫飯	chi fan	800
+喫茶	chi cha	700
+口吃	kou ji	700
+箇中	ge zhong	800
+箇中人	ge zhong ren	700
+真个	zhen ge	800
+好个	hao ge	700
+一個人	yi ge ren	800
+一隻鳥	yi zhi niao	800
+衹是	zhi shi	800
+只要	zhi yao	800
+面向	mian xiang	800
+方向	fang xiang	800
+剛才	gang cai	800
+才來	cai lai	700
+肛門	gang men	700
+胴疘	dong gong	700
+哄笑	hong xiao	700
+內鬨	nei hong	800
+一鬨而散	yi hong er san	700
+閣樓	ge lou	700
+內閣	nei ge	800
+內閤	nei ge	800
+閤下	ge xia	600

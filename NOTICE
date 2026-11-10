@@ -1,0 +1,43 @@
+# NOTICE
+
+## 本项目
+
+**OpenCC 大陆标准繁体 · 海宁吴语修订**
+（OpenCC Mainland Standard Traditional Chinese — Haining Wu Revision）
+
+修订依据：《大陸標準繁體漢字海寧吴語修訂方案》（海宁市潮百相公益发展协会 / 潮人语），
+含 2026-11-10 更正：1639 组「閤」的简体规范字由「閤」更正为「𬮤」。
+
+维护：海宁市潮百相公益发展协会（<https://github.com/zjhncbx>）。
+用途：为「海宁方言辞典」协作编纂系统提供自动繁简转换，以及编辑时可直接输入
+修订后的大陆标准繁体字。
+
+## 上游项目与致谢
+
+本项目的全部 OpenCC 字表、词表、方案配置均以（且仅以）下列项目为基础修订，
+未改动上游仓库任何文件：
+
+- **OpenCC-Traditional-Chinese-characters-according-to-Chinese-government-standards**
+  作者：TerryTian-tech；贡献者：易建鹏、胡馨媚、段亚彤
+  仓库：<https://github.com/TerryTian-tech/OpenCC-Traditional-Chinese-characters-according-to-Chinese-government-standards>
+  许可：Apache License 2.0（本仓库 `LICENSE` 为其全文副本）
+  上游字表词表的原始版权声明、贡献者与来源链接均保留在各 `.txt` 文件头部注释中。
+
+- **OpenCC（BYVoid）**
+  仓库：<https://github.com/BYVoid/OpenCC>；许可：Apache License 2.0
+  本仓库 `rules/split_reference.txt` 由 OpenCC 原版 `STPhrases.txt` 中
+  含分立正字的 595 条词条抽取而成，用于判定「并/併/並」「吃/喫」等
+  分立字在具体词组中的用法。原版字典版权归 OpenCC 项目所有。
+
+- **《通用规范汉字表》（2013）附件 1《规范字与繁体字、异体字对照表》**
+  为上游与本修订方案共同的字形依据。
+
+## 许可说明
+
+本仓库的**代码、文档与修订规则**采用 Apache License 2.0，与上游一致；
+`opencc/*.txt` 等字典数据为上游字典的派生作品，同样适用 Apache License 2.0，
+并保留上游全部版权声明。
+
+上游字典数据不适用于判定汉字规范性的法律效力场景。本修订方案是面向
+海宁吴语书写的地方性用字约定，**不是**对《通用规范汉字表》的官方修订；
+出版、教材等场景请以国家现行规范为准。

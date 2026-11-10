@@ -1,0 +1,29 @@
+{
+  "name": "Variant Chinese characters to Simplified Chinese characters — Haining Wu Revision",
+  "normalization": [
+    {
+      "dict": {
+        "type": "text",
+        "file": "CJK_Compatibility_Ideographs.txt"
+      }
+    }
+  ],
+  "conversion_chain": [
+    {
+      "dict": {
+        "type": "group",
+        "match_policy": "short_circuit",
+        "dicts": [
+          {
+            "type": "text",
+            "file": "VSPhrases.txt"
+          },
+          {
+            "type": "text",
+            "file": "VSCharacters.txt"
+          }
+        ]
+      }
+    }
+  ]
+}

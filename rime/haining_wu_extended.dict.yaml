@@ -1,0 +1,10 @@
+# Rime dictionary
+# 朙月拼音原词库 + 海宁吴语修订方案分立正字词库
+---
+name: haining_wu_extended
+version: "1.0.0"
+sort: by_weight
+import_tables:
+  - luna_pinyin
+  - haining_wu
+...
