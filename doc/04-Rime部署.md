@@ -21,6 +21,11 @@ python tools/build_ocd2.py
 python tools/build_ocd2.py --opencc-dict "D:/ProgramData/anaconda3/Lib/site-packages/opencc/clib/bin/opencc_dict.exe"
 ```
 
+> **Windows 中文路径**：原生 `opencc_dict.exe` 无法读取含非 ASCII 字符的路径，
+> 在「上传用-仓库文件」这类中文目录下会误报 `not found or not accessible`。
+> 本脚本会自动把字典复制到纯 ASCII 临时目录编译，再把 `.ocd2` 拷回 `rime/`，
+> 无需手工改名或搬目录。若自行指定 `--opencc-dict`，请确保该 exe 自身路径为纯 ASCII。
+
 ### 方案 A：ocd2（与上游一致，推荐）
 
 把以下文件复制到小狼毫的 opencc 数据目录

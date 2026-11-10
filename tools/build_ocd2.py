@@ -11,15 +11,49 @@
 
 生成的 ocd2 不纳入 Git（体积大、二进制、随字表自动重建），
 请按需在部署 Rime 时运行本脚本，产物落在 rime/ 目录。
+
+Windows 注意：原生 opencc_dict.exe 无法打开含非 ASCII 字符的路径。
+若项目解压到中文目录（例如「上传用-仓库文件」），本脚本会自动把字典
+复制到纯 ASCII 的临时目录编译，再把 .ocd2 拷回 rime/，无需手工改路径。
 """
 from __future__ import annotations
 import argparse
 import glob
 import os
+import shutil
 import subprocess
 import sys
+import tempfile
 
 ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+
+
+def _has_non_ascii(path):
+    return any(ord(c) > 127 for c in os.path.abspath(path))
+
+
+def _decode(data):
+    """opencc_dict.exe 在 Windows 上按系统 ANSI (GBK) 输出错误信息。"""
+    if not data:
+        return ''
+    for enc in ('utf-8', 'gbk', 'mbcs'):
+        try:
+            return data.decode(enc)
+        except (UnicodeDecodeError, LookupError):
+            continue
+    return data.decode('utf-8', 'replace')
+
+
+def _ascii_workdir():
+    """原生 opencc_dict.exe 无法打开含非 ASCII 字符的路径，准备纯 ASCII 暂存目录。"""
+    d = tempfile.mkdtemp(prefix='hn_ocd2_')
+    if not _has_non_ascii(d):
+        return d
+    shutil.rmtree(d, ignore_errors=True)
+    root = os.environ.get('SystemRoot') or 'C:\\Windows'
+    d = os.path.join(root, 'Temp', 'hn_ocd2_' + str(os.getpid()))
+    os.makedirs(d, exist_ok=True)
+    return d
 
 JOBS = [
     ('HNPhrases.txt', 'HNPhrases.ocd2'),
@@ -70,24 +104,46 @@ def main():
     print('opencc_dict : %s' % tool)
     os.makedirs(args.rime_dir, exist_ok=True)
 
+    # opencc_dict.exe 读不了中文路径：必要时在纯 ASCII 暂存目录里编译，再拷回 rime/。
+    paths = [os.path.join(args.opencc_dir, s) for s, _ in JOBS]
+    paths += [os.path.join(args.rime_dir, d) for _, d in JOBS]
+    scratch = None
+    if not args.dry_run and any(_has_non_ascii(p) for p in paths):
+        scratch = _ascii_workdir()
+    if scratch:
+        print('ascii scratch: %s' % scratch)
+
     failed = 0
-    for src, dst in JOBS:
-        inp = os.path.join(args.opencc_dir, src)
-        out = os.path.join(args.rime_dir, dst)
-        if not os.path.isfile(inp):
-            print('SKIP (missing) : %s' % src)
-            failed += 1
-            continue
-        cmd = [tool, '-i', inp, '-o', out, '-f', 'text', '-t', 'ocd2']
-        if args.dry_run:
-            print('DRY-RUN       : %s -> %s' % (src, dst))
-            continue
-        r = subprocess.run(cmd, capture_output=True, text=True)
-        if r.returncode != 0:
-            print('FAIL          : %s (%s)' % (src, (r.stderr or r.stdout).strip()[:200]))
-            failed += 1
-        else:
-            print('OK            : %-32s %8d bytes' % (dst, os.path.getsize(out)))
+    try:
+        for src, dst in JOBS:
+            inp = os.path.join(args.opencc_dir, src)
+            out = os.path.join(args.rime_dir, dst)
+            if not os.path.isfile(inp):
+                print('SKIP (missing) : %s' % src)
+                failed += 1
+                continue
+            if args.dry_run:
+                print('DRY-RUN       : %s -> %s' % (src, dst))
+                continue
+            if scratch:
+                work_in = os.path.join(scratch, src)
+                work_out = os.path.join(scratch, dst)
+                shutil.copyfile(inp, work_in)
+            else:
+                work_in, work_out = inp, out
+            cmd = [tool, '-i', work_in, '-o', work_out, '-f', 'text', '-t', 'ocd2']
+            r = subprocess.run(cmd, capture_output=True)  # bytes，避免 GBK 解码异常
+            if r.returncode != 0:
+                msg = (_decode(r.stderr) or _decode(r.stdout)).strip()[:200]
+                print('FAIL          : %s (%s)' % (src, msg))
+                failed += 1
+            else:
+                if scratch:
+                    shutil.copyfile(work_out, out)
+                print('OK            : %-32s %8d bytes' % (dst, os.path.getsize(out)))
+    finally:
+        if scratch:
+            shutil.rmtree(scratch, ignore_errors=True)
     return 1 if failed else 0
 
 
