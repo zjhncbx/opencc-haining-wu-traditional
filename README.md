@@ -73,10 +73,10 @@ node examples/js/convert.mjs
 
 ### Rime（小狼毫）
 
-见 [`doc/04-Rime部署.md`](doc/04-Rime部署.md)。一句话流程：
-`python tools/build_ocd2.py` → 复制 `rime/` 文件 → 放
-`luna_pinyin.custom.yaml` + 两个 `.dict.yaml` → 重新部署。
-之后 `he bing` 直接出「合併」、`ge` 可打出「箇 / 閤 / 𬮤」。
+见 [`doc/04-Rime部署.md`](doc/04-Rime部署.md)。与上游完全同一套做法：
+把 `rime/` 的 1 个 json + 3 个 ocd2 放进小狼毫 `data\opencc`，
+把 `luna_pinyin.custom.yaml` 放进用户文件夹，重新部署即可。
+**朙月拼音原词库不动**，只替换 `simplifier` 的 OpenCC 字典。
 
 ---
 
@@ -115,7 +115,7 @@ node examples/js/convert.mjs
 │   ├── 03-集成指南.md        # 辞典协作系统接入、CI 校验
 │   └── 04-Rime部署.md        # 小狼毫部署与分立正字输入
 ├── opencc/                   # 25 个 json + 修订后的完整 txt 字表词表
-├── rime/                     # Rime 配置、词库、部署用 yaml
+├── rime/                     # 1 json + 3 ocd2 + luna_pinyin.custom.yaml
 ├── rules/
 │   ├── overrides.tsv         # ★ 协作编辑入口：简 -> 修订繁 特例词表
 │   └── split_reference.txt   # OpenCC 原版 595 条分立字参考词条
@@ -148,7 +148,8 @@ python tools/export_web_dict.py
 
 生成器确定且幂等：不修改上游文件，重复运行得到相同结果。
 字表级规则集中在 `tools/rules.py`（`CHAR_PATCH`、`REVISION_TABLE`），
-词组级规则集中在 `rules/overrides.tsv` 与 `tools/rules.py`（`TG_GUARD`、`RIME_ENTRIES`）。
+词组级规则集中在 `rules/overrides.tsv` 与 `tools/rules.py`（`TG_GUARD`）。
+Rime 不另建词库，输入方案沿用朙月拼音原词库。
 
 当前回归结果：**18 项全部通过**（14 组转换用例 + 4 组简繁往返一致性）。
 

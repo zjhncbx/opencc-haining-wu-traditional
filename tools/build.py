@@ -245,97 +245,28 @@ RIME_T2HN_OCD2 = {
     ]}}],
 }
 
-RIME_T2HN_TEXT = {
-    "name": "Haining Wu Mainland Standard Traditional Chinese (Rime / plain text dictionaries)",
-    "conversion_chain": [{"dict": {"type": "group",
-                                   "match_policy": "short_circuit",
-                                   "dicts": [
-                                       {"type": "text", "file": "HNGuard.txt"},
-                                       {"type": "text", "file": "TGPhrases.txt"},
-                                       {"type": "text", "file": "TGCharacters_keep_simp.txt"},
-                                   ]}}],
-}
-
-RIME_S2HN_TEXT = {
-    "name": "Simplified Chinese to Haining Wu Mainland Standard Traditional Chinese (Rime)",
-    "conversion_chain": [{"dict": {"type": "group",
-                                   "match_policy": "short_circuit",
-                                   "dicts": [
-                                       {"type": "text", "file": "HNPhrases.txt"},
-                                       {"type": "text", "file": "STPhrases.txt"},
-                                       {"type": "text", "file": "STCharacters.txt"},
-                                   ]}}],
-}
-
+# 上游 Rime 方案：朙月拼音原词库一字不动，只把 simplifier 的 OpenCC 配置
+# 换成修订版字典。写法与上游 README「规范繁体转换方案如何应用于小狼毫」一致。
+# 不要自建 import_tables 扩展词库：那会丢掉 essay.txt 词频、破坏候选排序。
 LUNA_CUSTOM = """# luna_pinyin.custom.yaml
-# 朙月拼音挂载《大陆标准繁体汉字海宁吴语修订方案》扩展词库。
-#
-# 基础部署只需把本文件、haining_wu.dict.yaml、haining_wu_extended.dict.yaml
-# 三个文件放进 Rime 用户文件夹，然后「重新部署」。
-#
-# 注意事项（务必保留）：
-#   * 不要 patch `switches`。它是列表，整段写入会覆盖朙月拼音原有的
-#     ascii_mode / full_shape / simplification / ascii_punct 开关，
-#     导致原本的繁体输出设定失效。
-#   * haining_wu_extended.dict.yaml 里的 use_preset_vocabulary: true 不能删，
-#     否则预设词库 essay.txt 的词频不会载入，候选会退化成按码点排序，
-#     出现「打 wo 先出㠛㦱㧴」这类问题。详见 doc/04-Rime部署.md。
-#   * 不要在这里改 `simplifier`。扩展词库已能直接打出「個人」「合併」「喫飯」
-#     等修订繁体；若要把所有简体候选统一转成修订繁体，见 doc/04-Rime部署.md
-#     的「可选：全局简→修订繁」一节，需另行放置 opencc 配置与字典。
+# 放到 Rime 用户文件夹；与上游仓库 README 的写法一致。
+# 词库保持朙月拼音原版，仅替换 OpenCC 转换为本修订方案。
 patch:
-  "translator/dictionary": haining_wu_extended
-"""
+  switches:
+    - name: simplification
+      reset: 1
 
-EXTENDED_DICT = """# Rime dictionary
-# 朙月拼音原词库 + 海宁吴语修订方案分立正字词库
-#
-# 关键：use_preset_vocabulary: true 必须保留，否则词频全丢。
-#   朙月拼音的 luna_pinyin.dict.yaml 只给出约 7 万条「单字读音」，
-#   真正的词频来自预设词库 essay.txt（八股文，6.3 MB，如「我 1191912」、
-#   「個人 102677」、「並 63101」），由该声明在编译时载入。
-#   import_tables 只导入词条，不继承被导入词典的编译选项；
-#   若删掉这一行，扩展词库会只剩约 1.3 MB 的无权重单字表，
-#   sort: by_weight 退化为按码点排序，打 wo 会先冒出「㠛㦱㧴」
-#   这类 CJK 扩展 A 区生僻字，常用字反而翻不到。
----
-name: haining_wu_extended
-version: "1.0.1"
-sort: by_weight
-use_preset_vocabulary: true
-import_tables:
-  - luna_pinyin
-  - haining_wu
-...
+  simplifier:
+    opencc_config: t2hn_keep_simp.json
+    option_name: simplification
 """
 
 
 def build_rime(rime_dir, dry, report):
-    for fn, data in [('t2hn_keep_simp.json', RIME_T2HN_OCD2),
-                     ('t2hn_keep_simp_text.json', RIME_T2HN_TEXT),
-                     ('s2hn.json', RIME_S2HN_TEXT)]:
-        write_text(os.path.join(rime_dir, fn),
-                   json.dumps(data, ensure_ascii=False, indent=2) + '\n', dry)
-        report['rime'].append(fn)
+    write_text(os.path.join(rime_dir, 't2hn_keep_simp.json'),
+               json.dumps(RIME_T2HN_OCD2, ensure_ascii=False, indent=2) + '\n', dry)
     write_text(os.path.join(rime_dir, 'luna_pinyin.custom.yaml'), LUNA_CUSTOM, dry)
-    write_text(os.path.join(rime_dir, 'haining_wu_extended.dict.yaml'),
-               EXTENDED_DICT, dry)
-    lines = [
-        '# Rime dictionary',
-        '# 《大陆标准繁体汉字海宁吴语修订方案》分立正字与例词',
-        '# 由 tools/build.py 依据 tools/rules.py 生成，请勿手工改动本文件。',
-        '---',
-        'name: haining_wu',
-        'version: "1.0.0"',
-        'sort: by_weight',
-        '...',
-    ]
-    for word, pinyin, weight in R.RIME_ENTRIES:
-        lines.append('%s\t%s\t%d' % (word, pinyin, weight))
-    write_lines(os.path.join(rime_dir, 'haining_wu.dict.yaml'), lines, dry)
-    report['rime'].extend(['luna_pinyin.custom.yaml',
-                           'haining_wu_extended.dict.yaml',
-                           'haining_wu.dict.yaml'])
+    report['rime'].extend(['t2hn_keep_simp.json', 'luna_pinyin.custom.yaml'])
 
 
 # ---------------------------------------------------------------------------

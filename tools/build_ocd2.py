@@ -9,8 +9,8 @@
   <python>/Lib/site-packages/opencc/clib/bin/opencc_dict.exe）。
 本脚本会自动探测；找不到时用 --opencc-dict 指定。
 
-生成的 ocd2 不纳入 Git（体积大、二进制、随字表自动重建），
-请按需在部署 Rime 时运行本脚本，产物落在 rime/ 目录。
+生成的 3 个 ocd2 随仓库发布（与上游 rime/ 目录一致），
+改动字表后重跑本脚本并重新部署即可。
 
 Windows 注意：原生 opencc_dict.exe 无法打开含非 ASCII 字符的路径。
 若项目解压到中文目录（例如「上传用-仓库文件」），本脚本会自动把字典
@@ -56,12 +56,9 @@ def _ascii_workdir():
     return d
 
 JOBS = [
-    ('HNPhrases.txt', 'HNPhrases.ocd2'),
     ('HNGuard.txt', 'HNGuard.ocd2'),
     ('TGPhrases.txt', 'TGPhrases.ocd2'),
     ('TGCharacters_keep_simp.txt', 'TGCharacters_keep_simp.ocd2'),
-    ('STPhrases.txt', 'STPhrases.ocd2'),
-    ('STCharacters.txt', 'STCharacters.ocd2'),
 ]
 
 

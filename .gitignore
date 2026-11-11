@@ -6,9 +6,8 @@ __pycache__/
 .DS_Store
 Thumbs.db
 
-# Rime 二进制字典由 tools/build_ocd2.py 按需生成
-# （修订字表会随协作编辑持续更新，预编译产物容易过时）
-rime/*.ocd2
+# Rime 的 ocd2 字典与上游一样随仓库发布，下载即可部署；
+# 改动字表后用 tools/build_ocd2.py 重新生成。
 
 # 上游仓库副本（仅构建时需要，通过 --upstream 指定）
 /upstream/

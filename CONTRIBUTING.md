@@ -27,8 +27,8 @@
 3. 在 `tools/rules.py` 的 `TEST_CASES` 里补一组用例（输入 + 期望输出），
    让 `tools/verify.py` 能长期守住这条规则。
 
-4. 若要让 Rime 也能直接打出这个词，在 `tools/rules.py` 的 `RIME_ENTRIES`
-   加一条 `(词, 拼音, 权重)`。
+4. Rime 无需单独维护词库：字表、词表改完后跑 `tools/build_ocd2.py`
+   重新编译 3 个 ocd2 即可。输入方案沿用朙月拼音原词库与 `essay.txt` 词频。
 
 ## 二、改动字表级规则
 
