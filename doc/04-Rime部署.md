@@ -4,6 +4,10 @@
 让编辑辞典时能直接打出 `併 / 並 / 喫 / 衹 / 隻 / 鬨 / 疘 / 閤 / 箇 / 𬮤`
 等修订后的大陆标准繁体字。
 
+> **最省事的部署只需 3 个 yaml 文件**（见第二节），不需要编译 `.ocd2`、
+> 也不需要 `opencc` 目录。下面第一节的 ocd2 / 纯文本方案，只在需要
+> 「繁体稿件规范化」或「全局简 → 修订繁」时才用。
+>
 > 上游 Rime 目录直接给出预编译 `.ocd2`；本仓库改为**脚本生成**，
 > 因为修订字表会随协作编辑持续更新，预编译二进制容易过时。
 > 若不想生成二进制，可直接使用 `t2hn_keep_simp_text.json`（纯文本配置）。
@@ -57,56 +61,45 @@ opencc/CJK_Compatibility_Ideographs.txt
 
 ---
 
-## 二、配置输出方案
+## 二、基础部署：直接打出修订繁体（推荐）
 
-把 `rime/luna_pinyin.custom.yaml` 复制到 Rime 用户文件夹
-（Windows：`%APPDATA%\Rime`）：
-
-```yaml
-patch:
-  switches:
-    - name: simplification
-      reset: 1
-  simplifier:
-    opencc_config: t2hn_keep_simp.json
-    option_name: simplification
-  "translator/dictionary": haining_wu_extended
-```
-
-再把这两个文件放到同一目录：
+把这三个文件放进 Rime 用户文件夹（Windows：`%APPDATA%\Rime`）：
 
 ```
-rime/haining_wu.dict.yaml            # 分立正字 + 例词
+rime/luna_pinyin.custom.yaml
+rime/haining_wu.dict.yaml            # 分立正字 + 常用整词
 rime/haining_wu_extended.dict.yaml   # 朙月拼音原词库 + 上面的补充词库
 ```
 
-在小狼毫「中」字图标右键 → **重新部署**。
+`luna_pinyin.custom.yaml` 里只做一件事：
 
----
+```yaml
+patch:
+  "translator/dictionary": haining_wu_extended
+```
 
-## 三、直接输入修订后的繁体正字
+然后在小狼毫「中」字图标右键 → **重新部署**。不需要 `opencc` 目录、
+不需要编译 `.ocd2`，也不需要改任何开关。
 
-`haining_wu.dict.yaml` 已为每个分立正字标注拼音并给出较高权重：
+### 两个「不要」
 
-| 拼音 | 候选（部分） |
+| 不要 | 原因 |
 | --- | --- |
-| `bing` | 并、併、並、幷、倂、竝、并州、合併、並非、並且 |
-| `chi` / `ji` | 喫、吃；口吃（`kou ji`） |
-| `zhi` | 只、衹、隻、祇、秖；衹是、只要、一隻鳥 |
-| `ge` | 个、個、箇、閤、𬮤、阁、閣；箇中、真个、內閤、閣樓 |
-| `hong` | 哄、鬨、閧；哄笑、內鬨、一鬨而散 |
-| `gang` / `gong` | 肛（gang）、疘（gong）、肛門、胴疘 |
-| `xiang` / `cai` | 向、嚮、才、纔（后二者为异体，权重较低） |
+| 不要 patch `switches` | `switches` 是列表，整段写入会**覆盖**朙月拼音原有的 `ascii_mode` / `full_shape` / `zh_hant` / `simplification` 等开关。原来设好的繁体输出会失效，`simplification` 还会被强制默认开启 |
+| 不要在这里改 `simplifier` | `t2hn_keep_simp.json` 是「繁体稿件 → 规范繁体」的**规范化**配置，不是「拼音简体候选 → 修订繁体」的输入转换；它还依赖 6 个 ocd2/txt 字典，未一并放置时转换器会加载失败 |
 
-例词也被收录，因此词组输入即可直接出规范字形：
-`he bing → 合併`、`bing fei → 並非`、`chi fan → 喫飯`、
-`ge zhong → 箇中`、`nei ge → 內閤`、`nei hong → 內鬨`。
+> **故障复盘**：曾出现「打 `geren` 首选是 `𬮤㠴`、找不到 `個人`」。
+> 根因是 ① `switches` 被整段覆盖，`zh_hant` 开关丢失；
+> ② 扩展词库把极生僻的「𬮤」给了 900 权重，又没有「個人」整词，
+> Rime 只能用单字自动组词，拼出「𬮤」+ 同音生僻字的伪词。
+> 现已把生僻正字权重压到 100~500，并补入 `個人`（权重 2000）等常用整词。
 
 ### 验证
 
 部署后依次输入，确认候选栏出现的是修订字形：
 
 ```
+ge ren    → 個人（首选，不是「𬮤㠴」）
 he bing   → 合併（不是「合并」）
 bing fei  → 並非
 chi fan   → 喫飯
@@ -118,25 +111,62 @@ gang cai  → 剛才（不是「剛纔」）
 
 ---
 
-## 四、改成其它输入方案
+## 三、直接输入修订后的繁体正字
 
-本仓库的 `t2hn_keep_simp.json` / `s2hn.json` 是通用 OpenCC 配置，
-可按同样思路挂到任何 Rime 方案的 `simplifier`：
+`haining_wu.dict.yaml` 分两层权重：
+
+| 层级 | 权重 | 内容 |
+| --- | --- | --- |
+| 常用整词 | 1000~2000 | `個人`、`合併`、`並非`、`喫飯`、`衹是`、`剛才`、`一個人` 等，压过自动组词 |
+| 常用单字 | 800~1000 | 并、只、吃、个、個、向、才、哄、阁、閣、合 等 |
+| 分立正字 | 100~500 | 併、並、喫、衹、隻、鬨、疘、閤、𬮤、箇 等，翻候选可取，不抢首选 |
+| 异体字 | 100 | 幷、倂、竝、祇、秖、嚮、曏、纔、閧，仅备查 |
+
+| 拼音 | 候选（部分） |
+| --- | --- |
+| `bing` | 并、並、併、幷、倂、竝、并州、合併、並非、並且 |
+| `chi` / `ji` | 吃、喫；喫飯、喫茶；口吃（`kou ji`） |
+| `zhi` | 只、隻、衹、祇、秖；衹是、只要、一隻鳥 |
+| `ge` / `ge ren` | 个、個、阁、閣、箇、閤、𬮤；**個人**、各人、箇中、真个、內閤、閣樓 |
+| `hong` | 哄、鬨、閧；哄笑、內鬨、一鬨而散 |
+| `gang` / `gong` | 肛（gang）、疘（gong）、肛門、胴疘 |
+| `xiang` / `cai` | 向、才；嚮、曏、纔（异体，权重最低） |
+
+词组输入直接出规范字形：`ge ren → 個人`、`he bing → 合併`、
+`bing fei → 並非`、`chi fan → 喫飯`、`ge zhong → 箇中`、
+`nei ge → 內閤`、`nei hong → 內鬨`。
+
+---
+
+## 四、可选：全局「简 → 修订繁」（进阶）
+
+基础部署已能打出全部修订正字。若还希望**词库里没列出的**简体候选也自动
+转成修订繁体，才需要这一节。
+
+1. 在 Rime 用户文件夹下建 `opencc/` 子目录（`%APPDATA%\Rime\opencc\`），放入：
+
+```
+rime/s2hn.json            → opencc/s2hn.json
+opencc/HNPhrases.txt      → opencc/HNPhrases.txt
+opencc/STPhrases.txt      → opencc/STPhrases.txt
+opencc/STCharacters.txt   → opencc/STCharacters.txt
+```
+
+2. 在 `luna_pinyin.custom.yaml` 的 `patch:` 下**追加**（依旧不要动 `switches`）：
 
 ```yaml
-# <方案名>.custom.yaml
-patch:
   simplifier:
-    opencc_config: s2hn.json      # 简体输入 -> 修订繁体输出
+    opencc_config: s2hn.json
     option_name: simplification
 ```
 
-`s2hn.json` 使用 `HNPhrases.txt`、`STPhrases.txt`、`STCharacters.txt`
-（纯文本，方案 B 的目录内已包含前两个，另需复制 `STCharacters.txt`）。
+3. 重新部署。
 
-> 注意：`s2hn` 是「简 → 修订繁」，用于**本来输出简体**的输入方案；
-> 若方案本身已输出繁体，应使用 `t2hn_keep_simp`（繁 → 修订繁），
-> 否则会出现二次转换。
+> `s2hn` 是「简 → 修订繁」，只适用于**本来输出简体**的方案。朙月拼音的
+> `simplification` 开关原标签是「汉字／漢字」，换用 `s2hn.json` 后
+> 开关开启时实际输出修订繁体，标签语义会相反，属预期行为。
+> 若方案本身已输出繁体，应改用 `t2hn_keep_simp.json`（繁 → 修订繁）
+> 及其 6 个字典，见第一节方案 A / B，否则会二次转换。
 
 ---
 

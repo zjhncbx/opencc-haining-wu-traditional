@@ -7,62 +7,67 @@ version: "1.0.0"
 sort: by_weight
 ...
 并	bing	1000
-併	bing	900
-並	bing	900
+只	zhi	1000
+吃	chi	1000
+个	ge	1000
+個	ge	1000
+向	xiang	1000
+才	cai	1000
+肛	gang	800
+哄	hong	1000
+阁	ge	1000
+閣	ge	1000
+合	he	1000
+併	bing	300
+並	bing	500
+衹	zhi	200
+隻	zhi	500
+喫	chi	400
+箇	ge	200
+疘	gong	100
+鬨	hong	300
+閤	ge	150
+𬮤	ge	100
 幷	bing	100
 倂	bing	100
 竝	bing	100
-只	zhi	1000
-衹	zhi	900
-隻	zhi	900
-祇	zhi	200
+祇	zhi	100
 秖	zhi	100
-吃	chi	1000
-喫	chi	900
-个	ge	1000
-個	ge	1000
-箇	ge	900
-向	xiang	1000
-嚮	xiang	300
-才	cai	1000
-纔	cai	300
-肛	gang	800
-疘	gong	800
-哄	hong	1000
-鬨	hong	900
-閧	hong	200
-阁	ge	1000
-閣	ge	1000
-閤	ge	900
-𬮤	ge	900
-合	he	1000
-并州	bing zhou	800
-合併	he bing	800
-兼併	jian bing	700
-並非	bing fei	800
-並且	bing qie	800
-並列	bing lie	700
-喫飯	chi fan	800
-喫茶	chi cha	700
-口吃	kou ji	700
-箇中	ge zhong	800
-箇中人	ge zhong ren	700
-真个	zhen ge	800
-好个	hao ge	700
-一個人	yi ge ren	800
-一隻鳥	yi zhi niao	800
-衹是	zhi shi	800
-只要	zhi yao	800
-面向	mian xiang	800
-方向	fang xiang	800
-剛才	gang cai	800
-才來	cai lai	700
-肛門	gang men	700
-胴疘	dong gong	700
-哄笑	hong xiao	700
-內鬨	nei hong	800
-一鬨而散	yi hong er san	700
-閣樓	ge lou	700
-內閣	nei ge	800
-內閤	nei ge	800
-閤下	ge xia	600
+嚮	xiang	100
+曏	xiang	100
+纔	cai	100
+閧	hong	100
+個人	ge ren	2000
+个人	ge ren	1500
+各人	ge ren	1000
+一個人	yi ge ren	2000
+一个人	yi ge ren	1500
+并州	bing zhou	1200
+合併	he bing	2000
+兼併	jian bing	1200
+並非	bing fei	2000
+並且	bing qie	1500
+並列	bing lie	1200
+喫飯	chi fan	2000
+喫茶	chi cha	1200
+口吃	kou ji	1200
+箇中	ge zhong	1500
+箇中人	ge zhong ren	1200
+真个	zhen ge	1500
+好个	hao ge	1200
+一隻鳥	yi zhi niao	1500
+衹是	zhi shi	2000
+只要	zhi yao	1500
+面向	mian xiang	1500
+方向	fang xiang	1500
+剛才	gang cai	2000
+才來	cai lai	1200
+肛門	gang men	1200
+胴疘	dong gong	1000
+哄笑	hong xiao	1200
+內鬨	nei hong	1500
+一鬨而散	yi hong er san	1200
+閣樓	ge lou	1200
+內閣	nei ge	1500
+內閤	nei ge	1500
+閤下	ge xia	1000
