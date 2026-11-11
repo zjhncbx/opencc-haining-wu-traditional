@@ -85,20 +85,57 @@ patch:
 
 | 不要 | 原因 |
 | --- | --- |
-| 不要 patch `switches` | `switches` 是列表，整段写入会**覆盖**朙月拼音原有的 `ascii_mode` / `full_shape` / `zh_hant` / `simplification` 等开关。原来设好的繁体输出会失效，`simplification` 还会被强制默认开启 |
+| 不要 patch `switches` | `switches` 是列表，整段写入会**覆盖**朙月拼音原有的 `ascii_mode` / `full_shape` / `simplification` / `ascii_punct` 开关。原来设好的繁体输出会失效，`simplification` 还会被强制默认开启 |
 | 不要在这里改 `simplifier` | `t2hn_keep_simp.json` 是「繁体稿件 → 规范繁体」的**规范化**配置，不是「拼音简体候选 → 修订繁体」的输入转换；它还依赖 6 个 ocd2/txt 字典，未一并放置时转换器会加载失败 |
+| **不要删 `use_preset_vocabulary: true`** | 见下节，删掉后预设词频全丢，`wo` 会先出「㠛㦱㧴」 |
 
-> **故障复盘**：曾出现「打 `geren` 首选是 `𬮤㠴`、找不到 `個人`」。
-> 根因是 ① `switches` 被整段覆盖，`zh_hant` 开关丢失；
-> ② 扩展词库把极生僻的「𬮤」给了 900 权重，又没有「個人」整词，
-> Rime 只能用单字自动组词，拼出「𬮤」+ 同音生僻字的伪词。
-> 现已把生僻正字权重压到 100~500，并补入 `個人`（权重 2000）等常用整词。
+### 关键：`use_preset_vocabulary: true`
+
+`haining_wu_extended.dict.yaml` 里的这一行**必须保留**：
+
+```yaml
+sort: by_weight
+use_preset_vocabulary: true
+import_tables:
+  - luna_pinyin
+  - haining_wu
+```
+
+朙月拼音的 `luna_pinyin.dict.yaml` 只有约 7 万条**单字读音**（无权重），
+真正的词频来自预设词库 `essay.txt`（八股文，6.3 MB），由
+`use_preset_vocabulary: true` 在编译时载入，例如：
+
+| 词条 | 预设词频 |
+| --- | --- |
+| 我 | 1,191,912 |
+| 個人 | 102,677 |
+| 並且 | 112,978 |
+| 喫 | 65,597 |
+| 並 | 63,101 |
+
+**`import_tables` 只导入词条，不继承被导入词典的编译选项**。若省略该声明，
+编译出的 `haining_wu_extended.table.bin` 会从约 13 MB 缩到 1.3 MB，
+只剩无权重单字表，`sort: by_weight` 退化成按码点排序——
+于是 `wo` 音节下排在最前的是 U+381B「㠛」、U+39B1「㦱」、U+39F4「㧴」，
+而 U+6211「我」被挤到后面。检查方法：看 `%APPDATA%\Rime\build\`
+下 `haining_wu_extended.table.bin` 是否与 `luna_pinyin.table.bin` 体积相当。
+
+### 故障复盘
+
+| 现象 | 根因 | 修复 |
+| --- | --- | --- |
+| `geren` 首选是「𬮤㠴」、找不到「個人」 | `switches` 被整段覆盖；且扩展词库给极生僻「𬮤」900 权重、又缺「個人」整词，Rime 只能用单字自动组词拼出伪词 | 不再 patch `switches`；生僻正字降到 100~500，补入 `個人`（2000）等常用整词 |
+| `wo` 前三候选是「㠛㦱㧴」等扩展区生僻字，常用字翻不到 | `haining_wu_extended.dict.yaml` 缺 `use_preset_vocabulary: true`，`essay.txt` 词频未载入，候选按码点排序 | 补上该声明；词库体积与 `luna_pinyin.table.bin` 对齐即生效 |
+
+> 第一轮的权重调整只解决了「伪词」问题，没有触及词频体系，
+> 所以 `wo` 这类**不在补充词库里**的音节仍会暴露排序退化。
 
 ### 验证
 
 部署后依次输入，确认候选栏出现的是修订字形：
 
 ```
+wo        → 我（首选；若出「㠛㦱㧴」说明词频没载入，见上节）
 ge ren    → 個人（首选，不是「𬮤㠴」）
 he bing   → 合併（不是「合并」）
 bing fei  → 並非
@@ -121,6 +158,12 @@ gang cai  → 剛才（不是「剛纔」）
 | 常用单字 | 800~1000 | 并、只、吃、个、個、向、才、哄、阁、閣、合 等 |
 | 分立正字 | 100~500 | 併、並、喫、衹、隻、鬨、疘、閤、𬮤、箇 等，翻候选可取，不抢首选 |
 | 异体字 | 100 | 幷、倂、竝、祇、秖、嚮、曏、纔、閧，仅备查 |
+
+> 权重说明：`essay.txt` 的预设词频量级是几万到百万，远高于上表。
+> `haining_wu.dict.yaml` 里与预设词库**重复**的条目（如「個人」「並非」「喫飯」「並」）
+> 以预设词频为准，上表权重作用在预设词库**未收录**的条目上
+> （如「真个」「衹是」「一隻鳥」「內閤」「胴疘」「𬮤」），
+> 用于压过 Rime 的单字自动组词，而不是与常用字争首位。
 
 | 拼音 | 候选（部分） |
 | --- | --- |

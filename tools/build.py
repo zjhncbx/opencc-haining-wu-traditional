@@ -275,8 +275,11 @@ LUNA_CUSTOM = """# luna_pinyin.custom.yaml
 #
 # 注意事项（务必保留）：
 #   * 不要 patch `switches`。它是列表，整段写入会覆盖朙月拼音原有的
-#     ascii_mode / full_shape / zh_hant / simplification 等开关，
+#     ascii_mode / full_shape / simplification / ascii_punct 开关，
 #     导致原本的繁体输出设定失效。
+#   * haining_wu_extended.dict.yaml 里的 use_preset_vocabulary: true 不能删，
+#     否则预设词库 essay.txt 的词频不会载入，候选会退化成按码点排序，
+#     出现「打 wo 先出㠛㦱㧴」这类问题。详见 doc/04-Rime部署.md。
 #   * 不要在这里改 `simplifier`。扩展词库已能直接打出「個人」「合併」「喫飯」
 #     等修订繁体；若要把所有简体候选统一转成修订繁体，见 doc/04-Rime部署.md
 #     的「可选：全局简→修订繁」一节，需另行放置 opencc 配置与字典。
@@ -286,10 +289,20 @@ patch:
 
 EXTENDED_DICT = """# Rime dictionary
 # 朙月拼音原词库 + 海宁吴语修订方案分立正字词库
+#
+# 关键：use_preset_vocabulary: true 必须保留，否则词频全丢。
+#   朙月拼音的 luna_pinyin.dict.yaml 只给出约 7 万条「单字读音」，
+#   真正的词频来自预设词库 essay.txt（八股文，6.3 MB，如「我 1191912」、
+#   「個人 102677」、「並 63101」），由该声明在编译时载入。
+#   import_tables 只导入词条，不继承被导入词典的编译选项；
+#   若删掉这一行，扩展词库会只剩约 1.3 MB 的无权重单字表，
+#   sort: by_weight 退化为按码点排序，打 wo 会先冒出「㠛㦱㧴」
+#   这类 CJK 扩展 A 区生僻字，常用字反而翻不到。
 ---
 name: haining_wu_extended
-version: "1.0.0"
+version: "1.0.1"
 sort: by_weight
+use_preset_vocabulary: true
 import_tables:
   - luna_pinyin
   - haining_wu
