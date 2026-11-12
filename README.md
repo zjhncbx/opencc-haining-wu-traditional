@@ -10,7 +10,7 @@
 
 > 基于 [TerryTian-tech/OpenCC-...Chinese-government-standards](https://github.com/TerryTian-tech/OpenCC-Traditional-Chinese-characters-according-to-Chinese-government-standards)，
 > 按海宁吴语繁体用字约定修订字表、词表后的 OpenCC 转换方案集合。
-> 具备完整的**简⇄繁互转**与 **Rime 定制**能力，面向
+> 具备完整的**简⇄繁互转**与 [Rime / 小狼毫输入法](https://rime.im/) 定制能力，面向
 > [海宁方言辞典](https://github.com/zjhncbx/haining-dialect-dictionary) 协作编纂系统的自动繁简转换，
 > 并让编辑者在录入时可直接输入修订后的大陆标准繁体字。
 > 本方案服务于「潮人语」的海宁吴语书写实践，品牌介绍见文末。
@@ -116,7 +116,11 @@ node examples/js/convert.mjs
 > 另有一个**开箱即用的在线转换页面**（见下），两者用途不同：
 > `dist/hn-dicts.json` 供辞典系统集成，`web/dicts.js` 供页面离线直接使用。
 
-### Rime（小狼毫）
+### Rime（小狼毫输入法）
+
+[Rime（中州韵输入法引擎）](https://rime.im/) 是开源输入法框架，
+[小狼毫（Weasel）](https://github.com/rime/weasel) 是它在 Windows 上的发行版。
+下面的「部署」就是把这几个文件放进小狼毫的目录，重新部署后即可用它直接打出修订后的繁体正字。
 
 见 [`doc/04-Rime部署.md`](doc/04-Rime部署.md)。与上游完全同一套做法：
 把 `rime/` 的 1 个 json + 3 个 ocd2 放进小狼毫 `data\opencc`，
@@ -260,6 +264,7 @@ Rime 不另建词库，输入方案沿用朙月拼音原词库。
 - 《通用规范汉字表》（2013）：<https://www.gov.cn/zhengce/content/2013-08/19/content_1289.htm>
 - 上游方案：<https://github.com/TerryTian-tech/OpenCC-Traditional-Chinese-characters-according-to-Chinese-government-standards>
 - OpenCC：<https://github.com/BYVoid/OpenCC>
+- Rime 输入法：<https://rime.im/> · 小狼毫（Windows 前端）：<https://github.com/rime/weasel>
 - 集成目标：<https://github.com/zjhncbx/haining-dialect-dictionary>
 - 协会组织：<https://github.com/zjhncbx> · <https://www.hncbx.org.cn>
 
