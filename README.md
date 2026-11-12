@@ -1,10 +1,19 @@
 # OpenCC 大陆标准繁体 · 海宁吴语修订
 
+> ## 在线转换工具 · 开箱即用 → <https://www.hncbx.org.cn/opencc-haining-wu-traditional/>
+>
+> **[直接打开使用](https://www.hncbx.org.cn/opencc-haining-wu-traditional/)** —— 不用装 OpenCC、不用配 Rime、不用注册，浏览器打开就能转。
+> 8 个转换方向、实时转换与改动高亮、命中规则逐条溯源、36 条用例一键自检；
+> 纯前端页面，文本不上传。需要离线时，下载 [`web/`](web/index.html) 双击 `index.html` 同样可用。
+
+---
+
 > 基于 [TerryTian-tech/OpenCC-...Chinese-government-standards](https://github.com/TerryTian-tech/OpenCC-Traditional-Chinese-characters-according-to-Chinese-government-standards)，
 > 按海宁吴语繁体用字约定修订字表、词表后的 OpenCC 转换方案集合。
 > 具备完整的**简⇄繁互转**与 **Rime 定制**能力，面向
 > [海宁方言辞典](https://github.com/zjhncbx/haining-dialect-dictionary) 协作编纂系统的自动繁简转换，
 > 并让编辑者在录入时可直接输入修订后的大陆标准繁体字。
+> 本方案用于「潮人语」语保品牌（海宁市潮百相公益发展协会）的海宁吴语书写实践，品牌介绍见文末。
 
 ---
 
@@ -120,7 +129,8 @@ node examples/js/convert.mjs
 
 ### 在线转换页面（浏览器里直接验证）
 
-[`web/index.html`](web/index.html) 是纯前端单页工具，**双击即可离线使用**，
+线上入口：**<https://www.hncbx.org.cn/opencc-haining-wu-traditional/>**（见文首）。
+[`web/index.html`](web/index.html) 是同一个纯前端单页工具，**双击即可离线使用**，
 不需要服务器、文本不上传。用来快速核对某个字／词到底会转成什么、命中了哪条规则。
 
 | 功能 | 说明 |
@@ -140,9 +150,10 @@ python tools/make_web_corpus.py   # 用原生 OpenCC 刷新语料基准（需 pi
 node tools/verify_web.mjs         # 36 条用例 + 10 万级词表语料 md5 比对
 ```
 
-发布成网页：仓库 **Settings → Pages → Source 选 GitHub Actions**，
-[`pages.yml`](.github/workflows/pages.yml) 会把 `web/` 部署到
-`https://zjhncbx.github.io/opencc-haining-wu-traditional/`；
+线上页面已发布：**<https://www.hncbx.org.cn/opencc-haining-wu-traditional/>**
+（备用地址 <https://zjhncbx.github.io/opencc-haining-wu-traditional/>）。
+仓库 **Settings → Pages → Source 选 GitHub Actions** 后，
+[`pages.yml`](.github/workflows/pages.yml) 会在 `web/**` 变动时自动重新部署；
 也可以把 `web/` 整个目录丢到任意静态服务器，或本地双击 `index.html`。
 
 ---
@@ -176,6 +187,8 @@ node tools/verify_web.mjs         # 36 条用例 + 10 万级词表语料 md5 比
 
 ```
 ├── README.md  LICENSE  NOTICE  CONTRIBUTING.md  .gitignore
+├── assets/
+│   └── chaorenyu-brand.jpg   # 「潮人语」品牌图（仅用于 README 展示）
 ├── doc/
 │   ├── 01-修订方案.md        # 修订说明与对照表
 │   ├── 02-与上游差异.md      # 字表/词表逐条差异、已知取舍
@@ -233,6 +246,8 @@ Rime 不另建词库，输入方案沿用朙月拼音原词库。
 - 代码、文档、修订规则：**Apache License 2.0**（`LICENSE` 为上游全文副本）。
 - 字典数据为上游字典的派生作品，同样适用 Apache-2.0，
   上游版权声明与贡献者信息保留在各 `.txt` 文件头与 `NOTICE` 中。
+- `assets/chaorenyu-brand.jpg` 为「潮人语」品牌图片，版权归海宁市潮百相公益发展协会所有，
+  仅用于本 README 的品牌展示，**不适用** Apache-2.0 授权。
 - 上游字典数据、以及本修订方案，均**不能替代**国家现行汉字规范的法定效力；
   出版、教材等场景请以[《通用规范汉字表》](https://www.gov.cn/zhengce/content/2013-08/19/content_1289.htm)等官方文件为准。
 - 本方案是面向海宁吴语书写的地方性用字约定，不是对《通用规范汉字表》的官方修订。
@@ -241,8 +256,21 @@ Rime 不另建词库，输入方案沿用朙月拼音原词库。
 
 ## 七、相关链接
 
+- **在线转换工具（开箱即用）：<https://www.hncbx.org.cn/opencc-haining-wu-traditional/>**
 - 《通用规范汉字表》（2013）：<https://www.gov.cn/zhengce/content/2013-08/19/content_1289.htm>
 - 上游方案：<https://github.com/TerryTian-tech/OpenCC-Traditional-Chinese-characters-according-to-Chinese-government-standards>
 - OpenCC：<https://github.com/BYVoid/OpenCC>
 - 集成目标：<https://github.com/zjhncbx/haining-dialect-dictionary>
 - 协会组织：<https://github.com/zjhncbx> · <https://www.hncbx.org.cn>
+
+---
+
+## 八、关于「潮人语」
+
+「潮人语」是海宁市潮百相公益发展协会的语保品牌与音乐组合，以海宁方言的记录、书写与传播为工作方向。
+本方案服务于「潮人语」的海宁吴语书写与[海宁方言辞典](https://github.com/zjhncbx/haining-dialect-dictionary)编纂实践，
+为繁体用字提供一套可复现、可校验的转换依据。
+
+<img src="assets/chaorenyu-brand.jpg" alt="潮人语 · 海宁市潮百相公益发展协会 · 语保品牌与音乐组合" width="720">
+
+> 图片含「潮人语」品牌二维码。版权归海宁市潮百相公益发展协会所有，授权说明见「六、许可与边界」。
