@@ -1,0 +1,143 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>大陆标准繁体在线转换器 · 海宁吴语修订</title>
+<meta name="description" content="按《大陸標準繁體漢字海寧吴語修訂方案》修订的 OpenCC 转换工具，纯前端、可离线，支持规则追溯与回归自检。">
+<link rel="stylesheet" href="style.css">
+</head>
+<body>
+<div class="wrap">
+
+  <header class="hero">
+    <div class="eyebrow">规范繁体 · 吴语用字 · 规则验证</div>
+    <h1>大陆标准繁体在线转换器 <span class="tag">海宁吴语修订</span></h1>
+    <p class="lede">把文字贴进来，直接看修订版 OpenCC 会转成什么、命中了哪条规则，
+      再跑一遍仓库里的回归用例。页面纯前端运行，文本不上传，双击本文件即可离线使用。</p>
+    <div class="chips">
+      <span>纯前端 · 文本不上传</span>
+      <span>离线可用</span>
+      <span>字典与 <code>opencc/</code> 同源</span>
+      <span id="meta-line">字典载入中…</span>
+    </div>
+  </header>
+
+  <section class="card modes">
+    <div class="section-head">
+      <h2>转换方向</h2>
+      <span id="mode-desc" class="mode-desc"></span>
+    </div>
+    <div id="mode-list" class="mode-list"></div>
+    <div class="alias-note">配置别名：<code>s2t</code> ≡ <code>s2hn</code>、
+      <code>t2gov</code> ≡ <code>t2hn</code>、
+      <code>t2gov_keep_simp</code> ≡ <code>t2hn_keep_simp</code>。
+      需要 jieba 分词或候选字功能请使用原生 OpenCC 配置。</div>
+  </section>
+
+  <section class="workspace" id="workspace">
+    <div class="card pane">
+      <div class="pane-head">
+        <h2>输入原文</h2>
+        <div class="toolbar">
+          <button type="button" data-act="sample">示例</button>
+          <button type="button" data-act="paste">粘贴</button>
+          <button type="button" data-act="clear">清空</button>
+        </div>
+      </div>
+      <textarea id="input" spellcheck="false" placeholder="在这里粘贴或输入需要转换的文字…"></textarea>
+      <div class="pane-foot">
+        <span id="in-count">0 字</span>
+        <span class="muted">输入即转换</span>
+      </div>
+    </div>
+
+    <div class="card pane">
+      <div class="pane-head">
+        <h2>转换结果</h2>
+        <div class="toolbar">
+          <button type="button" data-act="copy" class="primary">复制</button>
+          <button type="button" data-act="swap">结果→输入</button>
+          <button type="button" data-act="download">下载 .txt</button>
+        </div>
+      </div>
+      <div id="output" class="output" aria-live="polite"></div>
+      <div class="pane-foot">
+        <span id="out-count">0 字</span>
+        <label class="inline"><input type="checkbox" id="highlight" checked> 标出改动</label>
+        <label class="inline">字号
+          <select id="font-size">
+            <option>14</option><option>15</option><option selected>16</option>
+            <option>18</option><option>20</option><option>22</option><option>24</option>
+          </select>
+        </label>
+        <label class="inline">字体
+          <select id="font-family">
+            <option value="sans">黑体（默认）</option>
+            <option value="serif">宋体 / 衬线</option>
+            <option value="mono">等宽</option>
+          </select>
+        </label>
+      </div>
+    </div>
+  </section>
+
+  <section class="card inspect">
+    <div class="section-head">
+      <h2>命中规则</h2>
+      <div class="toolbar">
+        <label class="inline"><input type="checkbox" id="only-changed" checked> 只看有改动的</label>
+        <span id="hit-summary" class="muted"></span>
+      </div>
+    </div>
+    <div class="table-wrap">
+      <table id="hit-table">
+        <thead><tr><th>位置</th><th>原文片段</th><th>结果</th><th>规则来源</th></tr></thead>
+        <tbody></tbody>
+      </table>
+    </div>
+    <p class="hint">「规则来源」对应 <code>opencc/</code> 下的字表词表；
+      <code>HNPhrases.txt</code> 来自协作编辑入口 <code>rules/overrides.tsv</code>，
+      <code>HNGuard.txt</code> 是保护词条。恒等映射（如 <code>閤→閤</code>、
+      <code>真个→真个</code>）用于挡住上游的归并，取消勾选即可看到。</p>
+  </section>
+
+  <section class="card selftest">
+    <div class="section-head">
+      <h2>自检 · 回归用例</h2>
+      <div class="toolbar">
+        <button type="button" data-act="selftest" class="primary">运行全部用例</button>
+        <span id="test-meta" class="muted"></span>
+      </div>
+    </div>
+    <div id="test-result" class="test-result">
+      点「运行全部用例」，浏览器会用本页同一套引擎核对仓库里的转换用例，
+      用来确认页面字典没有过期、转换语义没有跑偏。
+    </div>
+  </section>
+
+  <footer>
+    <p><strong>实现说明</strong>：按 OpenCC <code>group / short_circuit</code> 语义转换
+      （字典按配置顺序短路、字典内最长匹配），先用兼容区表做规范化。
+      已用 Node 与原生 Python OpenCC 在 10 万级词表语料上逐字比对一致
+      （<code>node tools/verify_web.mjs</code>）。不含 jieba 分词与候选字。</p>
+    <p>「𬮤」等 CJK 扩展区汉字若显示成方框，请换用支持扩展区的字体；
+      本页不捆绑字体，避免版权问题。字表词表改动后运行
+      <code>python tools/build_web.py</code> 重新生成 <code>web/dicts.js</code>。</p>
+    <p class="links">
+      <a href="https://github.com/zjhncbx/opencc-haining-wu-traditional" target="_blank" rel="noreferrer">本项目仓库</a> ·
+      <a href="https://github.com/TerryTian-tech/OpenCC-Traditional-Chinese-characters-according-to-Chinese-government-standards" target="_blank" rel="noreferrer">上游 t2gov</a> ·
+      <a href="https://xebec33.github.io/Mainland_Traditional_Chinese_Converter/" target="_blank" rel="noreferrer">参考：大陆标准繁体在线转换器</a> ·
+      <a href="https://zjhncbx.github.io/opencc-haining-wu-traditional/" target="_blank" rel="noreferrer">本页 Pages 地址</a>
+    </p>
+    <p class="muted" id="footer-meta"></p>
+  </footer>
+</div>
+
+<div id="toast" role="status" aria-live="polite"></div>
+
+<script src="dicts.js"></script>
+<script src="engine.js"></script>
+<script src="app.js"></script>
+</body>
+</html>

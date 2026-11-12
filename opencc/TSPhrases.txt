@@ -585,3 +585,5 @@
 龍鍾	龙钟 龙锺
 龔昇	龚昇
 𢕁堂	弄堂
+# Haining Wu revision: added by tools/build.py (see tools/rules.py)
+於莵	於莵

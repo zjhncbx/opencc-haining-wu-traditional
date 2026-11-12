@@ -1,0 +1,11 @@
+# custom_phrase.txt — 朙月拼音自定义短语（海宁吴语修订方案）
+# 放到 Rime 用户文件夹（Windows：%APPDATA%\Rime）。
+# 上游 luna_pinyin.schema.yaml 默认已启用 table_translator@custom_phrase，
+# 因此不需要改 luna_pinyin.custom.yaml，也不需要新建任何词库。
+#
+# 格式：文字<TAB>拼音码<TAB>权重
+# 「个」在海宁吴语中作结构助词（约相当于普通话「的」），多单字出现、使用极频繁。
+# 这里只把单字候选往前排，不造词组、不改词库、不影响其他音节与整词候选。
+# 想更靠前就把 1000 调大；想恢复默认就删掉下面这一行。
+# 若本文件夹已有 custom_phrase.txt，把最后一行追加进去即可，不要覆盖。
+个	ge	1000

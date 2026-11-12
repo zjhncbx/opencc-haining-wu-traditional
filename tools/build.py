@@ -81,7 +81,11 @@ def load_pairs(path):
 def patch_char_table(name, upstream, out_dir, dry, report):
     cfg = R.CHAR_PATCH.get(name, {'delete': [], 'set': {}})
     dels, sets = set(cfg['delete']), dict(cfg['set'])
+    # 文档附注：寔 / 蹔 非纯粹异体字，相关字表一律恒等，不归并到 實 / 暫。
+    if name in R.VARIANT_KEEP_TABLES:
+        sets.update(R.VARIANT_KEEP)
     out, seen = [], set()
+    fixes = R.UPSTREAM_COMMENT_FIX.get(name, {})
     for ln in read_lines(os.path.join(upstream, name)):
         if not is_data(ln) or '\t' not in ln:
             out.append(ln)
@@ -101,6 +105,7 @@ def patch_char_table(name, upstream, out_dir, dry, report):
         for k, v in sorted(added):
             out.append(k + '\t' + v)
             report['char_added'].append('%s: %s -> %s' % (name, k, v))
+    out = [fixes.get(x.strip(), x) for x in out]
     write_lines(os.path.join(out_dir, name), out, dry)
     report['tables'][name] = sum(1 for x in out if is_data(x))
 
@@ -109,15 +114,27 @@ def patch_char_table(name, upstream, out_dir, dry, report):
 # phrase tables
 # ---------------------------------------------------------------------------
 def tg_value(k, v):
-    """Reason 1: keep split orthodox characters. Reason 2: fold 纔/嚮 back."""
+    """Reason 1: keep split orthodox characters. Reason 2: fold 纔/嚮 back.
+    「衹」在海宁吴语书写中统一作「只」（「隻」仍为量词正字）；
+    港台「於」除 R.YU_KEEP_PHRASES 外统一作「于」；
+    「霉」是「黴」的简化字，规范繁体统一作「黴」。"""
     if len(k) != len(v):
         return v
     a = list(v)
     for i, (kc, vc) in enumerate(zip(k, v)):
-        if kc in R.ORTHODOX_SPLIT and vc in R.MERGE_TARGET:
+        if vc == '衹':
+            a[i] = '只'
+        elif vc == '霉':
+            a[i] = '黴'
+        elif kc in R.ORTHODOX_SPLIT and vc in R.MERGE_TARGET:
             a[i] = kc
         elif vc in ('纔', '嚮', '曏', '幷', '倂', '竝', '閧'):
             a[i] = R.VARIANT_NORMALIZE.get(vc, vc)
+    # 用字约定：姓氏人名、地名与感叹词（YU_KEEP_PHRASES）保留「於」，其余一律→「于」
+    if k not in R.YU_KEEP_PHRASES:
+        for i, c in enumerate(a):
+            if c == '於':
+                a[i] = '于'
     return ''.join(a)
 
 
@@ -130,6 +147,10 @@ def st_value(k, v, ref):
             a[i] = '才'
         elif c == '嚮':
             a[i] = '向'
+        elif c == '衹':
+            a[i] = '只'
+        elif c == '霉':
+            a[i] = '黴'
     r = ref.get(k)
     if r and len(r) == len(a):
         for i, (rc, ac) in enumerate(zip(r, a)):
@@ -174,6 +195,10 @@ def rewrite_phrase_table(name, upstream, out_dir, ref, dry, report):
         if nv != v:
             changed += 1
         out.append(k + '\t' + nv)
+    if name == 'TSPhrases.txt' and R.HN2S_EXTRA_PHRASES:
+        out.append('# Haining Wu revision: added by tools/build.py (see tools/rules.py)')
+        for k, v in sorted(R.HN2S_EXTRA_PHRASES.items()):
+            out.append(k + '\t' + v)
     write_lines(os.path.join(out_dir, name), out, dry)
     report['phrase_rewritten'][name] = changed
     report['tables'][name] = sum(1 for x in out if is_data(x))
@@ -261,12 +286,30 @@ patch:
     option_name: simplification
 """
 
+# 可选：用上游自带的 custom_phrase 机制把吴语助词「个」的单字候选提前。
+# 不改词库、不改 schema，只新增一个纯文本短语文件；用户目录若已有同名文件，
+# 应把最后一行追加进去而不是覆盖。
+CUSTOM_PHRASE = """# custom_phrase.txt — 朙月拼音自定义短语（海宁吴语修订方案）
+# 放到 Rime 用户文件夹（Windows：%APPDATA%\\Rime）。
+# 上游 luna_pinyin.schema.yaml 默认已启用 table_translator@custom_phrase，
+# 因此不需要改 luna_pinyin.custom.yaml，也不需要新建任何词库。
+#
+# 格式：文字<TAB>拼音码<TAB>权重
+# 「个」在海宁吴语中作结构助词（约相当于普通话「的」），多单字出现、使用极频繁。
+# 这里只把单字候选往前排，不造词组、不改词库、不影响其他音节与整词候选。
+# 想更靠前就把 1000 调大；想恢复默认就删掉下面这一行。
+# 若本文件夹已有 custom_phrase.txt，把最后一行追加进去即可，不要覆盖。
+个\tge\t1000
+"""
+
 
 def build_rime(rime_dir, dry, report):
     write_text(os.path.join(rime_dir, 't2hn_keep_simp.json'),
                json.dumps(RIME_T2HN_OCD2, ensure_ascii=False, indent=2) + '\n', dry)
     write_text(os.path.join(rime_dir, 'luna_pinyin.custom.yaml'), LUNA_CUSTOM, dry)
-    report['rime'].extend(['t2hn_keep_simp.json', 'luna_pinyin.custom.yaml'])
+    write_text(os.path.join(rime_dir, 'custom_phrase.txt'), CUSTOM_PHRASE, dry)
+    report['rime'].extend(['t2hn_keep_simp.json', 'luna_pinyin.custom.yaml',
+                           'custom_phrase.txt'])
 
 
 # ---------------------------------------------------------------------------
@@ -306,23 +349,32 @@ def build_revision_doc(doc_dir, dry):
     lines = [
         '# 大陆标准繁体汉字海宁吴语修订方案',
         '',
-        '> 本文件由《大陸標準繁體漢字海寧吴語修訂方案.docx》表格转录，',
-        '> 并纳入 2026-11-10 更正：1639 组「閤」的简体规范字由「閤」更正为「𬮤」；',
-        '> 2026-11-11 文档更新：0480「向」的异体字补入「曏」。',
+        '> 依据 [《通用规范汉字表》](https://www.gov.cn/zhengce/content/2013-08/19/content_1289.htm)',
+        '> 及附件《规范字与繁体字、异体字对照表》。',
+        '> 本文件是面向海宁吴语书写的地方性用字约定；转换规则见 `tools/rules.py`，',
+        '> 逐条差异见 [`doc/02-与上游差异.md`](02-与上游差异.md)。',
         '',
-        '繁体汉字为简体规范字之源，使用汉字书写、记录海宁吴语时以繁体为佳。',
-        '本方案基于《通用规范汉字表》附件 1《规范字与繁体字、异体字对照表》作极少量修订，',
-        '作为使用繁体汉字书写海宁吴语时的规范。',
+        '## 修订说明',
         '',
-        '## 三类修订',
+        '繁體漢字爲簡體規範字之源，使用漢字書寫、記録海寧吴語時以繁體爲佳。2013年國務院公布的《通用規範漢字表》在界定簡體漢字規範性的同時，也在其附件《規範字與繁體字、异體字對照表》中確定了繁體漢字的正、异之别，同時《新華字典》《現代漢語詞典》也通過標註繁簡關係間接解釋了繁體漢字的字義，基本確立了中國大陸地區的繁體漢字體系。本方案基于《規範字與繁體字、异體字對照表》進行極少量的修訂，將其作爲使用繁體漢字書寫海寧吴語時的規範。',
         '',
-        '1. **分立**：原表部分繁体正字与其异体字在现代吴语中读音、字义、用法并不构成异体关系，',
-        '   则分立为多个繁体正字。国家通用语常用的字，简体规范字形同原表；罕用的字若有同形字，',
-        '   参照该同形字的简体规范字，否则同繁体正字。',
-        '2. **合并**：原表视为两个繁体正字、简体规范字均为甲字，而两字传统上音义等同者，',
-        '   取甲字为正、乙字为异体（才/纔、向/嚮曏）。',
-        '3. **个/個/箇 三分**：借鉴《南昌方言词典》，规定「个」用于助词、「個」用于量词和名词、',
-        '   「箇」用于指示代词。',
+        '本方案從三方面對《規範字與繁體字、异體字對照表》進行修訂，具體修訂内容列下表。',
+        '',
+        '（1）原表將乙字視爲甲字的异體字，但兩者中古反切不同，海寧吴語今音亦不同，且較常用，不宜視爲异體關係，需分立。爲銜接國家通用語的簡體漢字書寫，分三類情况確定乙字的簡體規範字：其一，國家通用語常用，且有同形繁體正字，則參照該同形字的簡體規範字；其二，國家通用語常用，且無同形繁體正字，則參照原表簡體規範字；其三，國家通用語罕用，則參照類推簡化字。如：“并”“併”“並”三字在海寧吴語中讀音仍互不相同，宜分列爲三個繁體正字，因國家通用語常用，且無同形繁體正字，故簡體規範字形仍同原表作“并”。',
+        '',
+        '（2）原表將甲字與乙字視爲兩個繁體正字，且簡體規範字均爲甲字，實則兩字傳統上讀音、字義、用法等同，出于實際書寫的擇字需要，取甲字爲正，乙字爲异體字。如：“才”“纔”在“方、僅”義項上音義皆同，取“才”爲正。',
+        '',
+        '（3）現代南方方言中“个”的常用字義較多，且有讀音分化傾向，海寧吴語尤甚。傳統方言文獻已有通過异體字區分音、義的用例，《南昌方言詞典》進一步將“个”“個”“箇”三者分别使用。本方案借鑒前人，規定“个”用于助詞，“個”用于量詞和名詞，“箇”用于指示代詞。簡體規範字仍作“个”。',
+        '',
+        '## 三类修订（要点）',
+        '',
+        '1. **分立**：原表视乙为甲的异体字，但中古反切不同、海宁吴语今音亦不同且较常用，需分立为多个繁体正字。',
+        '   简体规范字按三类情形确定：常用且有同形繁体正字→参照该同形字；常用但无同形繁体正字→参照原表；罕用→参照类推简化字。',
+        '   例：并/併/並 三者吴语读音互不相同，因通用语常用且无同形繁体正字，简体规范字仍同原表作「并」。',
+        '2. **合并**：原表视为两个繁体正字、简体规范字均为甲字，实则音义用法等同；出于实际书写的择字需要取甲为正、乙为异体。',
+        '   例：「才」「纔」在「方、僅」义项上音义皆同，取「才」为正（才/纔、向/嚮曏）。',
+        '3. **个/個/箇 三分**：现代南方方言「个」字义多且有读音分化，《南昌方言词典》已分别使用三者；',
+        '   本方案定「个」助词、「個」量词名词、「箇」指示代词，**简体规范字仍作「个」**。',
         '',
         '## 修订对照表',
         '',
@@ -338,13 +390,61 @@ def build_revision_doc(doc_dir, dry):
         '',
         '| 修订 | 繁→修订繁 `t2hn` | 简→修订繁 `s2hn` | 修订繁→简 `hn2s` |',
         '| --- | --- | --- | --- |',
-        '| 分立 | 不再把 並/併/喫/衹/隻/鬨/疘/閤/箇 归并 | 按义项分派正字（词表优先） | 各自对应简体规范字 |',
+        '| 分立 | 不再把 並/併/喫/隻/鬨/疘/閤/箇 归并 | 按义项分派正字（词表优先） | 各自对应简体规范字 |',
         '| 合并 | 纔→才、嚮→向、曏→向 | 不再输出 纔/嚮/曏 | 纔→才、嚮→向、曏→向 |',
         '| 三分 | 个/個/箇 一律原样保留 | 个（助词）/個（量词名词）/箇（指示代词） | 三者→个 |',
-        '| 𬮤 更正 | 閤 为独立正字 | 𬮤→閤 | 閤→𬮤 |',
+        '| 只 / 衹 | 衹→只 | 「只」「衹」相关词一律输出「只」 | 衹→只 |',
+        '| 閤 / 𬮤 | 閤 为独立正字 | 𬮤→閤 | 閤→𬮤 |',
+        '| 附注两字 | 寔/蹔 一律原样保留 | 不涉及 | 寔/蹔 一律原样保留 |',
+        '| 於 / 于 | 除姓氏人名、地名与感叹词外，词表「於」一律→「于」 | 简体「于」不变；感叹词由词表分派「於」 | 於→于（例外保留） |',
+        '| 霉 / 黴 | 霉→黴（含「倒霉」等词） | 霉→黴 | 沿用上游 黴→霉 |',
         '',
         '> 说明：`t2hn` 主方案对「个/個/箇」三者一律原样保留，不再做上游的 `个→個` 归并；',
         '> 如需把繁简混杂稿件中的简体按义项转为修订繁体，请用 `s2hn`。',
+        '',
+        '## 用字约定：於 / 于',
+        '',
+        '大陆标准繁体一般用「于」。港台习用的「於」只保留于两类场合：',
+        '',
+        '1. **姓氏、人名、地名**：於梨華、樊於期、於潛 …',
+        '2. **感叹词及同源古语**：於乎、於戲、於菟（於莵）、於呼哀哉、於穆、於邑 …',
+        '',
+        '其余词条一律作「于」：關於→關于、於是→于是、等於→等于、於此→于此、青出於藍→青出于藍。',
+        '（`hn2s` 方向再按常规简化为「关于 / 于是 / 青出于蓝」。）',
+        '单字「於」不设字表映射，保留姓氏用法；词组层面已覆盖常用词。',
+        '港台／繁简混杂稿件请用 `t2hn` 或 `t2hn_keep_simp` 规范化；',
+        '`v2s`、`t2new` 是字形方案，不参与本条用字约定。',
+        '',
+        '## 用字约定：霉 / 黴',
+        '',
+        '《规范字与繁体字、异体字对照表》把「霉—黴」列为规范字与繁体正字的对应，',
+        '即「霉」是「黴」的简化字，不是可在繁体文本中独立使用的传承正字。',
+        '因此本方案在 简→修订繁 与 繁→修订繁 两个方向一律作「黴」：',
+        '发霉／發霉→發黴、倒霉→倒黴、霉乾菜→黴乾菜，单字「霉」→「黴」。',
+        '',
+        '上游 `t2gov` 采用港台按义项分化的立场，保留「倒霉」等写法，并在',
+        '`STCharacters.txt` 给「霉」留了 `黴 霉` 一对多候选；本修订不采用该分化，',
+        '也不保留一对多候选。修订繁→简方向沿用上游 `黴→霉`。',
+        '',
+        'Rime 侧：朙月拼音词库同时收「發霉」「發黴」（词频相同），',
+        '`simplifier` 把「發霉」规范为「發黴」后，由 schema 自带的 `uniquifier` 去重，',
+        '故 `famei` 只出一个「發黴」候选；单字 `mei` 同理。',
+        '',
+        '## 附注',
+        '',
+        '此外，原表附注對异體字在部分義項和用法上可作規範字使用的情况做了説明，但部分异體字由于國家通用語罕用，未得到注明，而海寧吴語常用，故此處補充附注。',
+        '',
+        '（1）序號1285：“寔”可用于“此、這”含義。',
+        '',
+        '（2）序號2599：“蹔”可用于“疾進”含義。',
+        '',
+        '这两字不是纯粹的异体字，在特定用法下也是繁体正字，落地方式：',
+        '',
+        '| 要求 | 做法 |',
+        '| --- | --- |',
+        '| 输入法能打出单字 | `TGCharacters_keep_simp.txt` 恒等映射，Rime 候选不被 simplifier 改写 |',
+        '| 繁简转换不归并 | `TG/TS/VSCharacters` 系列一律保留原形，不转「實 / 暫」「实 / 暂」 |',
+        '| 不补词汇 | 词表不新增任何含「寔」「蹔」的词条 |',
         '',
     ]
     write_text(os.path.join(doc_dir, '01-修订方案.md'), '\n'.join(lines), dry)
@@ -399,6 +499,9 @@ def main():
     build_rime(args.rime_out, dry, report)
     build_revision_doc(args.doc_dir, dry)
     build_tests(args.tests_dir, report, dry)
+    # 在线转换页面的字典与 opencc/ 同源，随每次重建一起刷新，避免页面用到过期字表
+    import build_web
+    build_web.main(dry=dry)
 
     print('=== BUILD REPORT%s ===' % (' (dry-run, no files written)' if dry else ''))
     print('upstream        : %s' % upstream)

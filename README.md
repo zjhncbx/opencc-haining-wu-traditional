@@ -1,7 +1,7 @@
 # OpenCC 大陆标准繁体 · 海宁吴语修订
 
 > 基于 [TerryTian-tech/OpenCC-...Chinese-government-standards](https://github.com/TerryTian-tech/OpenCC-Traditional-Chinese-characters-according-to-Chinese-government-standards)，
-> 按《大陸標準繁體漢字海寧吴語修訂方案》修订字表、词表后的 OpenCC 转换方案集合。
+> 按海宁吴语繁体用字约定修订字表、词表后的 OpenCC 转换方案集合。
 > 具备完整的**简⇄繁互转**与 **Rime 定制**能力，面向
 > [海宁方言辞典](https://github.com/zjhncbx/haining-dialect-dictionary) 协作编纂系统的自动繁简转换，
 > 并让编辑者在录入时可直接输入修订后的大陆标准繁体字。
@@ -10,18 +10,36 @@
 
 ## 一、这是什么
 
-2013 年《通用规范汉字表》附件 1 确定了大陆地区的规范繁体字形，上游项目据此提供了
-OpenCC 转换方案。本方案在其基础上作**极少量、可追溯**的修订，作为使用繁体汉字书写
-海宁吴语时的规范。三类修订：
+2013 年国务院公布的[《通用规范汉字表》](https://www.gov.cn/zhengce/content/2013-08/19/content_1289.htm)在界定简体汉字规范性的同时，
+其附件《规范字与繁体字、异体字对照表》确定了繁体汉字的正、异之别；
+《新华字典》《现代汉语词典》也通过标注繁简关系间接解释了繁体汉字的字义，
+基本确立了中国大陆地区的繁体汉字体系。
+上游项目据此提供了 OpenCC 转换方案，本方案在其基础上作**极少量、可追溯**的修订，
+作为使用繁体汉字书写海宁吴语时的规范。三类修订：
 
 | 类型 | 内容 |
 | --- | --- |
-| **① 分立** | 原表视为异体/合并、但在现代吴语中读音字义并不等同的字，分立为多个繁体正字：并/併/並、只/衹/隻、吃/喫、哄/鬨、肛/疘、阁(閣)/𬮤(閤) |
-| **② 合并** | 原本两个繁体正字而音义等同者，取一为正、另一为异体：才（正）/纔（异）、向（正）/嚮（异） |
-| **③ 三分** | 借鉴《南昌方言词典》：「个」助词、「個」量词与名词、「箇」指示代词 |
+| **① 分立** | 原表部分繁体正字与其异体字中古音韵不同、海宁吴语今音亦不同，且较常用，不宜视为异体：并/併/並、只/衹/隻、吃/喫、哄/鬨、肛/疘、阁(閣)/𬮤(閤) |
+| **② 合并** | 原表视为两个繁体正字、简体规范字均为甲字，实则音义等同；出于实际书写的择字需要取甲为正、乙为异体：才/纔、向/嚮曏 |
+| **③ 三分** | 现代南方方言「个」字义多且有读音分化，传统方言文献已有以异体字区分音义的用例；借鉴《南昌方言词典》，定「个」助词、「個」量词名词、「箇」指示代词，**简体规范字仍作「个」** |
 
-> **2026-11-10 更正**：1639 组「閤」的简体规范字由「閤」更正为「**𬮤**」
-> （原文档因该类推简化字当时无法输入而暂写作「閤」）。繁体正字仍为「閤」。
+分立字的简体规范字按三种情形确定：国家通用语常用且有同形繁体正字 → 参照该同形字；
+常用但无同形繁体正字 → 参照原表简体规范字（并/併/並 即属此类）；罕用 → 参照类推简化字。
+合并一类的典型例为「才」「纔」在「方、僅」义项上音义皆同，取「才」为正。
+
+用字约定：海宁吴语一般说「只」，故「只」「衹」相关词在各方向一律用「只」，
+不按中古反切分派「衹」；量词「隻」仍是独立正字（「一只鸟 → 一隻鳥」不受影响）。
+序号 1285「寔」、2599「蹔」非纯粹异体字，各方向保留原形、不补词组，输入法可直接打单字。
+
+港台习用的「於」只保留于**姓氏、人名、地名**与**感叹词**（於乎、於戲、於菟／於莵等），
+其余词一律作「于」：於是→于是、等於→等于、於此→于此（繁→修订繁保持其余字形，
+繁→简再按常规简化）。单字「於」不设字表映射，保留姓氏用法；
+`v2s`、`t2new` 是字形方案，不参与本条约定。
+
+《规范字与繁体字、异体字对照表》以「霉—黴」为规范字与繁体正字的对应，故「霉」是
+「黴」的简化字，规范繁体一律作「黴」：发霉／發霉→發黴、倒霉→倒黴、霉乾菜→黴乾菜。
+上游采用的港台按义项分化（保留「霉」及 `黴 霉` 一对多候选）本修订不采用；
+Rime 里 `famei` 的两个同频候选经 `simplifier` 规范后由 `uniquifier` 并为「發黴」一个。
 
 完整对照表见 [`doc/01-修订方案.md`](doc/01-修订方案.md)，逐条差异见
 [`doc/02-与上游差异.md`](doc/02-与上游差异.md)。
@@ -34,8 +52,19 @@ OpenCC 转换方案。本方案在其基础上作**极少量、可追溯**的修
 | 吃饭 / 口吃 | **喫飯 / 口吃** | 吃饭 / 口吃 |
 | 个中 / 真个 / 一个人 | **箇中 / 真个 / 一個人** | 個中 / 真個 / 一個人 |
 | 刚才 / 面向 | **剛才 / 面向** | 剛纔 / 面嚮 |
-| 内哄 / 哄笑 | **內鬨 / 哄笑** | 内哄 / 哄笑 |
-| 内𬮤 / 阁楼 | **內閤 / 閣樓** | 内合 / 閣樓 |
+| 内哄 / 哄笑 | **内鬨 / 哄笑** | 内哄 / 哄笑 |
+| 内𬮤 / 阁楼 | **内閤 / 閣樓** | 内合 / 閣樓 |
+| 发霉 / 倒霉 / 霉菌 | **發黴 / 倒黴 / 黴菌** | 發黴 / 倒霉 / 黴菌 |
+
+港台／繁简混杂稿件走 `t2hn` 时：
+
+| 繁体输入 `t2hn` | 修订版繁体 | 上游 `t2gov` |
+| --- | --- | --- |
+| 關於 / 於是 / 等於 / 於此 | **關于 / 于是 / 等于 / 于此** | 關於 / 於是 / 等於 / 於此 |
+| 青出於藍 / 幾近於 | **青出于藍 / 幾近于** | 青出於藍 / 幾近於 |
+| 於乎 / 於戲 / 於菟（於莵） | **原样保留「於」** | 同左 |
+| 於梨華 / 樊於期 / 於潛 | **原样保留「於」** | 同左 |
+| 發霉 / 發黴 / 倒霉 | **發黴 / 發黴 / 倒黴** | 發霉 / 發黴 / 倒霉 |
 
 ---
 
@@ -71,12 +100,46 @@ node examples/js/convert.mjs
 见 [`examples/js/convert.mjs`](examples/js/convert.mjs) 与
 [`doc/03-集成指南.md`](doc/03-集成指南.md)。
 
+> 另有一个**开箱即用的在线转换页面**（见下），两者用途不同：
+> `dist/hn-dicts.json` 供辞典系统集成，`web/dicts.js` 供页面离线直接使用。
+
 ### Rime（小狼毫）
 
 见 [`doc/04-Rime部署.md`](doc/04-Rime部署.md)。与上游完全同一套做法：
 把 `rime/` 的 1 个 json + 3 个 ocd2 放进小狼毫 `data\opencc`，
 把 `luna_pinyin.custom.yaml` 放进用户文件夹，重新部署即可。
 **朙月拼音原词库不动**，只替换 `simplifier` 的 OpenCC 字典。
+
+可选：再把 `rime/custom_phrase.txt` 放进用户文件夹，把吴语助词「个」的单字候选提前
+（`ge` 打出来更靠前）。用的仍是上游 schema 自带的 `custom_phrase` 机制，
+不新建词库、不改 `luna_pinyin.custom.yaml`；不需要就别放。
+
+### 在线转换页面（浏览器里直接验证）
+
+[`web/index.html`](web/index.html) 是纯前端单页工具，**双击即可离线使用**，
+不需要服务器、文本不上传。用来快速核对某个字／词到底会转成什么、命中了哪条规则。
+
+| 功能 | 说明 |
+| --- | --- |
+| 8 个转换方向 | `s2hn` / `t2hn` / `hn2s` / `t2s` / `t2hn_keep_simp` / `v2s` / `t2new` / `t2new_keep_simp` |
+| 实时转换 + 改动高亮 | 悬停高亮处显示命中的字典与原文片段 |
+| 命中规则表 | 逐条列出「原文 → 结果 → 规则来源」，含 `HNGuard` 的恒等保护词条 |
+| 34 条用例自检 | 页面内一键运行，确认字典没过期、转换语义没跑偏 |
+| 复制 / 粘贴 / 下载 / 字号 / 字体 | 便于把结果贴回辞典稿件、核对字形 |
+
+字典由 `python tools/build_web.py` 从 `opencc/` 生成到 `web/dicts.js`（约 2.5 MB，
+随仓库提交，页面不联网）；`tools/build.py` 已自动调用它。改字表词表后：
+
+```bash
+python tools/build.py            # 重建字典 + 刷新网页字典
+python tools/make_web_corpus.py   # 用原生 OpenCC 刷新语料基准（需 pip install opencc）
+node tools/verify_web.mjs         # 34 条用例 + 10 万级词表语料 md5 比对
+```
+
+发布成网页：仓库 **Settings → Pages → Source 选 GitHub Actions**，
+[`pages.yml`](.github/workflows/pages.yml) 会把 `web/` 部署到
+`https://zjhncbx.github.io/opencc-haining-wu-traditional/`；
+也可以把 `web/` 整个目录丢到任意静态服务器，或本地双击 `index.html`。
 
 ---
 
@@ -99,7 +162,7 @@ node examples/js/convert.mjs
 | `v2s.json` | 只把异体字转简体 | 校对辅助 |
 | `*_jieba.json` / `*_jieba_traditional.json` | 上述方案的分词/候选字变体 | 需 jieba 词典 |
 
-数据文件：`HNPhrases.txt`（93 条方案优先词条）、`HNGuard.txt`（15 条保护词条）、
+数据文件：`HNPhrases.txt`（93 条方案优先词条）、`HNGuard.txt`（46 条保护词条）、
 `STCharacters/STPhrases`、`TSCharacters/TSPhrases`、`TGCharacters/TGPhrases`、
 `GovVariants`、`VSCharacters/VSPhrases`、`CJK_Compatibility_Ideographs.txt`。
 
@@ -110,12 +173,13 @@ node examples/js/convert.mjs
 ```
 ├── README.md  LICENSE  NOTICE  CONTRIBUTING.md  .gitignore
 ├── doc/
-│   ├── 01-修订方案.md        # docx 对照表转录（含 𬮤 更正）
+│   ├── 01-修订方案.md        # 修订说明与对照表
 │   ├── 02-与上游差异.md      # 字表/词表逐条差异、已知取舍
 │   ├── 03-集成指南.md        # 辞典协作系统接入、CI 校验
 │   └── 04-Rime部署.md        # 小狼毫部署与分立正字输入
 ├── opencc/                   # 25 个 json + 修订后的完整 txt 字表词表
-├── rime/                     # 1 json + 3 ocd2 + luna_pinyin.custom.yaml
+├── rime/                     # 1 json + 3 ocd2 + luna_pinyin.custom.yaml + 可选 custom_phrase.txt
+├── web/                      # 在线转换页面：index.html / style.css / engine.js / app.js / dicts.js
 ├── rules/
 │   ├── overrides.tsv         # ★ 协作编辑入口：简 -> 修订繁 特例词表
 │   └── split_reference.txt   # OpenCC 原版 595 条分立字参考词条
@@ -123,11 +187,16 @@ node examples/js/convert.mjs
 │   ├── rules.py              # 修订规则单一数据源
 │   ├── build.py              # 生成器（支持 --dry-run）
 │   ├── build_ocd2.py         # 编译 Rime ocd2
-│   ├── export_web_dict.py    # 导出前端 JSON 字典
-│   └── verify.py             # 18 项转换回归测试
+│   ├── build_web.py          # 生成 web/dicts.js（由 build.py 自动调用）
+│   ├── export_web_dict.py    # 导出集成用 dist/hn-dicts.json
+│   ├── make_web_corpus.py    # 刷新网页引擎的语料基准
+│   ├── verify_web.mjs        # Node 网页引擎回归（用例 + 语料 md5）
+│   └── verify.py             # 33 项转换回归测试（29 组用例 + 4 组往返）
 ├── examples/python/convert.py
 ├── examples/js/convert.mjs
-└── tests/cases.json          # 14 组转换用例
+└── tests/
+    ├── cases.json            # 29 组转换用例
+    └── web_corpus.json       # 网页引擎 vs 原生 OpenCC 的语料 md5 基准
 ```
 
 ---
@@ -151,7 +220,7 @@ python tools/export_web_dict.py
 词组级规则集中在 `rules/overrides.tsv` 与 `tools/rules.py`（`TG_GUARD`）。
 Rime 不另建词库，输入方案沿用朙月拼音原词库。
 
-当前回归结果：**18 项全部通过**（14 组转换用例 + 4 组简繁往返一致性）。
+回归测试：`python tools/verify.py`（转换用例）与 `node tools/verify_web.mjs`（网页引擎语料比对）。
 
 ---
 
@@ -161,13 +230,14 @@ Rime 不另建词库，输入方案沿用朙月拼音原词库。
 - 字典数据为上游字典的派生作品，同样适用 Apache-2.0，
   上游版权声明与贡献者信息保留在各 `.txt` 文件头与 `NOTICE` 中。
 - 上游字典数据、以及本修订方案，均**不能替代**国家现行汉字规范的法定效力；
-  出版、教材等场景请以《通用规范汉字表》等官方文件为准。
+  出版、教材等场景请以[《通用规范汉字表》](https://www.gov.cn/zhengce/content/2013-08/19/content_1289.htm)等官方文件为准。
 - 本方案是面向海宁吴语书写的地方性用字约定，不是对《通用规范汉字表》的官方修订。
 
 ---
 
 ## 七、相关链接
 
+- 《通用规范汉字表》（2013）：<https://www.gov.cn/zhengce/content/2013-08/19/content_1289.htm>
 - 上游方案：<https://github.com/TerryTian-tech/OpenCC-Traditional-Chinese-characters-according-to-Chinese-government-standards>
 - OpenCC：<https://github.com/BYVoid/OpenCC>
 - 集成目标：<https://github.com/zjhncbx/haining-dialect-dictionary>

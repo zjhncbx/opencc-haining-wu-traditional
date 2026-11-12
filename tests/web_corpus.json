@@ -1,0 +1,38 @@
+{
+  "note": "由 tools/make_web_corpus.py 用原生 Python OpenCC 生成；改动字表词表后重跑。",
+  "step": 7,
+  "schemes": {
+    "s2hn": {
+      "chars": 36229,
+      "md5": "0eabc675de36bf6c82062e39a02ddccf"
+    },
+    "t2hn": {
+      "chars": 38493,
+      "md5": "68ad402e1ea55eef5a92cb24456e4002"
+    },
+    "hn2s": {
+      "chars": 10528,
+      "md5": "677e59bb62ee2c3703e80410a4f1bc9c"
+    },
+    "t2s": {
+      "chars": 10528,
+      "md5": "677e59bb62ee2c3703e80410a4f1bc9c"
+    },
+    "t2hn_keep_simp": {
+      "chars": 33701,
+      "md5": "50c16da3db27dbd1bd72459c2f46f4cd"
+    },
+    "v2s": {
+      "chars": 5323,
+      "md5": "ec47d02c92cd523039b89300df76cad2"
+    },
+    "t2new": {
+      "chars": 5929,
+      "md5": "75d92235924d22ad66b1837126e8610e"
+    },
+    "t2new_keep_simp": {
+      "chars": 1137,
+      "md5": "70939c0bf8ec82f00689265a497e405f"
+    }
+  }
+}
