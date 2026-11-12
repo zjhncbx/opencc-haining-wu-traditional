@@ -3,12 +3,12 @@
   "step": 7,
   "schemes": {
     "s2hn": {
-      "chars": 36229,
-      "md5": "0eabc675de36bf6c82062e39a02ddccf"
+      "chars": 36230,
+      "md5": "3204dc8bedfc4ff5a166e9391d2aac13"
     },
     "t2hn": {
       "chars": 38493,
-      "md5": "68ad402e1ea55eef5a92cb24456e4002"
+      "md5": "580a39e8664da601f234f1e2c4cbe160"
     },
     "hn2s": {
       "chars": 10528,
@@ -20,7 +20,7 @@
     },
     "t2hn_keep_simp": {
       "chars": 33701,
-      "md5": "50c16da3db27dbd1bd72459c2f46f4cd"
+      "md5": "93727333ec8f7d8efc9b151e57848e6e"
     },
     "v2s": {
       "chars": 5323,
