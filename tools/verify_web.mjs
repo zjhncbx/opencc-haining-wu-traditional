@@ -4,7 +4,7 @@
  *   node tools/verify_web.mjs
  *
  * 两道校验：
- *   1. 跑完 web/dicts.js 内置的 25 条用例（tests/cases.json + 补齐方向的用例）；
+ *   1. 跑完 web/dicts.js 内置的 41 条用例（tests/cases.json + 补齐方向的用例）；
  *   2. 用各方案字典的键拼出约 10 万字语料，转换后与 tests/web_corpus.json
  *      里由「原生 Python OpenCC」算出的 md5 对比，确保短路语义没有跑偏。
  *

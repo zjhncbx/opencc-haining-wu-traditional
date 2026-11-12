@@ -81,23 +81,48 @@
   },
   {
     "scheme": "t2hn",
-    "input": "寔 蹔",
-    "expected": "寔 蹔"
+    "input": "搨 搨本 搨片 塗搨 拓本 拓片 寔 蹔",
+    "expected": "搨 搨本 搨片 塗搨 拓本 拓片 寔 蹔"
   },
   {
     "scheme": "t2hn_keep_simp",
-    "input": "寔 蹔",
-    "expected": "寔 蹔"
+    "input": "搨 搨本 塗搨 寔 蹔",
+    "expected": "搨 搨本 塗搨 寔 蹔"
   },
   {
     "scheme": "hn2s",
-    "input": "寔 蹔",
-    "expected": "寔 蹔"
+    "input": "搨 搨本 塗搨 拓本 寔 蹔",
+    "expected": "搨 搨本 涂搨 拓本 寔 蹔"
   },
   {
     "scheme": "v2s",
-    "input": "寔 蹔",
-    "expected": "寔 蹔"
+    "input": "搨 寔 蹔",
+    "expected": "搨 寔 蹔"
+  },
+  {
+    "scheme": "s2hn",
+    "input": "搨 搨本 塗搨 拓本 寔 蹔",
+    "expected": "搨 搨本 塗搨 拓本 寔 蹔"
+  },
+  {
+    "scheme": "s2hn",
+    "input": "炸 煠 爆炸 水裏煠煠",
+    "expected": "炸 煠 爆炸 水裏煠煠"
+  },
+  {
+    "scheme": "t2hn",
+    "input": "炸 煠 爆炸 水裏煠煠",
+    "expected": "炸 煠 爆炸 水裏煠煠"
+  },
+  {
+    "scheme": "t2hn_keep_simp",
+    "input": "炸 煠 水裏煠煠",
+    "expected": "炸 煠 水裏煠煠"
+  },
+  {
+    "scheme": "hn2s",
+    "input": "炸 煠 水裏煠煠",
+    "expected": "炸 煠 水里煠煠"
   },
   {
     "scheme": "s2hn",
